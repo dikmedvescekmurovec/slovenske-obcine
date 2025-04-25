@@ -25,7 +25,7 @@ def fetch_and_save_content(data, output_dir="municipality_content"):
         if 'url' in item:
             url = item['url']
             # Sanitize the municipality name for use as a filename
-            municipality_name = item.get('Obcina', 'Unknown').replace("č", "c").replace("š", "s").replace("Ž", "Z").replace("Č", "C").replace("Š", "S").replace(" ", "_").replace("/", "_")
+            municipality_name = item.get('Obcina', 'Unknown').replace("Občina ", "").replace(" ", "_").replace("/", "_")
             page_dir = os.path.join(output_dir, municipality_name) # Create a directory for each page's data
             if not os.path.exists(page_dir):
                 os.makedirs(page_dir)
@@ -59,13 +59,14 @@ def fetch_and_save_content(data, output_dir="municipality_content"):
                             if img_url:
                                 #handle relative urls
                                 img_url = urljoin(url, img_url)
+                                img_name = os.path.basename('grb.png')
                                 if i == 0 and len(images) > 1: 
                                   img_name = os.path.basename('zastava.png')
-                                else:
-                                  img_name = os.path.basename('grb.png')
                                 img_path = os.path.join(page_dir, img_name)
                                 try:
-                                    img_response = requests.get(img_url, stream=True)
+                                    # Add User-Agent header to the image request
+                                    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+                                    img_response = requests.get(img_url, stream=True, headers=headers)
                                     img_response.raise_for_status()
                                     with open(img_path, 'wb') as img_file:
                                         for chunk in img_response.iter_content(chunk_size=8192):
@@ -83,7 +84,6 @@ def fetch_and_save_content(data, output_dir="municipality_content"):
                 with open(filename, "w", encoding="utf-8") as f:
                     f.write(content)
                 print(f"Content from {url} saved to {filename}")
-                time.sleep(0.3)  # Be nice to the server
 
             except requests.exceptions.RequestException as e:
                 print(f"Error fetching {url}: {e}")
