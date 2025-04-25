@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 // MUI Imports
-import { Badge, Link, TextField } from '@mui/material';
+import { Badge, Grid, Link, TextField } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
@@ -91,7 +91,8 @@ const MunicipalityCard: React.FC<{ municipality: Municipality }> = React.memo(({
                     },
                     display: 'flex', // Use flexbox for internal layout if needed
                     flexDirection: 'column',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    maxWidth: 'fit-content'
                 }}
                 onClick={toggleImage}
             >
@@ -415,11 +416,11 @@ const MunicipalitiesPage = () => {
             <RegionSelect onChange={e => setSelectedRegions([...e])}></RegionSelect>
             <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8"> {/* Improved responsive grid and gap */}
                 <AnimatePresence> {/* Enable exit animations */}
-                  <Stack gap={4}>
+                  <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }} justifyContent={'space-between'}>
                     {filteredMunicipalities.map((municipality) => (
                         <MunicipalityCard key={municipality.Obcina} municipality={municipality} />
                     ))}
-                    </Stack>
+                  </Grid>
                 </AnimatePresence>
             </Box>
         </Box>
