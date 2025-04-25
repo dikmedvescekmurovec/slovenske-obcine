@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 // MUI Imports
-import { Badge, Link } from '@mui/material';
+import { Badge, Link, TextField } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
@@ -18,6 +18,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 // Icon Imports
 import { AlertCircle, ExternalLink } from 'lucide-react'; // Added ExternalLink icon
+import RegionSelect from './components/RegionSelect';
+import useDebounce from './debounce';
 
 // --- Interface Definition ---
 interface Municipality {
@@ -34,8 +36,8 @@ interface Municipality {
 }
 
 // --- Municipality Card Component ---
-const MunicipalityCard: React.FC<{ municipality: Municipality }> = ({ municipality }) => {
-    const [showImage, setShowImage] = useState(false);
+const MunicipalityCard: React.FC<{ municipality: Municipality }> = React.memo(({ municipality }) => {
+    const [showImage, setShowImage] = useState(true);
     const imageRef = useRef<HTMLImageElement>(null);
     const [imageLoaded, setImageLoaded] = useState(false);
     const [imageError, setImageError] = useState(false);
@@ -172,22 +174,6 @@ const MunicipalityCard: React.FC<{ municipality: Municipality }> = ({ municipali
                          <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
                             <strong>Odcepitev:</strong> {municipality.OdcepitevOdkomuneobcine || '-'}
                         </Typography>
-
-                        {municipality.url && (
-                            <Box sx={{ mt: 1 }}> {/* Add some space above the link */}
-                                <Typography variant="body2">
-                                    <a
-                                        href={municipality.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-400 hover:underline" // Tailwind classes for link
-                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }} // Align icon and text
-                                    >
-                                        Vir: Wikipedia <ExternalLink size={16} /> {/* Added external link icon */}
-                                    </a>
-                                </Typography>
-                            </Box>
-                        )}
                     </Stack>
                                         {/* Image Section */}
                                         <AnimatePresence>
@@ -245,7 +231,7 @@ const MunicipalityCard: React.FC<{ municipality: Municipality }> = ({ municipali
             </Card>
         </motion.div>
     );
-};
+});
 
 // --- Loading Skeleton Component ---
 const LoadingSkeleton = () => {
@@ -278,6 +264,49 @@ const MunicipalitiesPage = () => {
     const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [searchEntry, setSearchEntry] = useState('');
+    const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+
+    // Use the debounced hook for the value you'll use for filtering/searching
+    const debouncedSearchEntry = useDebounce(searchEntry, 300); // Adjust delay (ms) as needed
+    const searchBar = useRef<HTMLInputElement>(null);
+      useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+          if ((event.ctrlKey || event.metaKey) && event.key === 'f') {
+            event.preventDefault(); // Prevent the default browser search box
+            searchBar.current?.focus();
+            console.log('aseds')
+          }
+        };
+    
+        window.addEventListener('keydown', handleKeyDown);
+    
+        // Clean up the event listener on component unmount
+        return () => {
+          window.removeEventListener('keydown', handleKeyDown);
+        };
+      }, []); // Empty dependency array means this effect runs once on mount
+
+
+      const filteredMunicipalities = useMemo(() => {      
+        let currentMunicipalities = municipalities;
+        if (debouncedSearchEntry) {
+          currentMunicipalities = currentMunicipalities.filter(m =>
+            m.Obcina.toLowerCase().includes(debouncedSearchEntry.toLowerCase())
+          );
+        }
+      
+        // Apply region filter if regions are selected
+        if (selectedRegions.length > 0) {
+          currentMunicipalities = currentMunicipalities.filter(m =>
+            selectedRegions.includes(m.Pokrajina)
+          );
+        }
+      
+        return currentMunicipalities;
+      
+      }, [municipalities, debouncedSearchEntry, selectedRegions]); // Corrected dependencies
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -376,10 +405,18 @@ const MunicipalitiesPage = () => {
             >
                 Slovenske občine
             </Typography>
+            <TextField
+                fullWidth
+                label="Filtriraj občine"
+                variant="outlined"
+                onChange={e => setSearchEntry(e.target.value)}
+                ref={searchBar}
+              />
+            <RegionSelect onChange={e => setSelectedRegions([...e])}></RegionSelect>
             <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8"> {/* Improved responsive grid and gap */}
                 <AnimatePresence> {/* Enable exit animations */}
                   <Stack gap={4}>
-                    {municipalities.map((municipality) => (
+                    {filteredMunicipalities.map((municipality) => (
                         <MunicipalityCard key={municipality.Obcina} municipality={municipality} />
                     ))}
                     </Stack>
