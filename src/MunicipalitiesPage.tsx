@@ -82,9 +82,14 @@ const MunicipalityCard: React.FC<{ municipality: Municipality }> = ({ municipali
                     color: '#e2e8f0', // Light grey text
                     borderRadius: 2, // Increased border radius for softer look
                     boxShadow: '0 8px 16px rgba(0, 0, 0, 0.4)', // More pronounced shadow
-                    transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out', // 
+                    transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out', // Smooth hover transition
+                    '&:hover': {
+                        transform: 'translateY(-5px)', // Lift card slightly on hover
+                        boxShadow: '0 12px 24px rgba(0, 0, 0, 0.6)', // Darker shadow on hover
+                    },
                     display: 'flex', // Use flexbox for internal layout if needed
                     flexDirection: 'column',
+                    cursor: 'pointer'
                 }}
                 onClick={toggleImage}
             >
@@ -138,15 +143,61 @@ const MunicipalityCard: React.FC<{ municipality: Municipality }> = ({ municipali
                     sx={{ pb: 1 }} // Reduced padding bottom
                 />
                 <CardContent sx={{ flexGrow: 1 }}> {/* Allow content to take available space */}
-                    {/* Image Section */}
-                    <AnimatePresence>
+
+                    {/* Details Section */}
+                    <Stack direction="row" spacing={2} sx={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}>
+                    <Stack spacing={1.5}> {/* Increased spacing */}
+                        {/* Helper function or direct map could be used if more fields */}
+                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}> {/* Lighter grey text */}
+                            <strong>Površina:</strong> {municipality.Povrsina} km²
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
+                            <strong>Prebivalci:</strong> {municipality.Prebivalci}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
+                            <strong>Gostota:</strong> {municipality.Gostota} /km²
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
+                            <strong>Naselja:</strong> {municipality.Naselja}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
+                            <strong>Leto ustanovitve:</strong> {municipality.Leto}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
+                            <strong>Pokrajina:</strong> {municipality.Pokrajina}
+                        </Typography>
+                         <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
+                            <strong>Odcepitev:</strong> {municipality.OdcepitevOdkomuneobcine || '-'}
+                        </Typography>
+
+                        {municipality.url && (
+                            <Box sx={{ mt: 1 }}> {/* Add some space above the link */}
+                                <Typography variant="body2">
+                                    <a
+                                        href={municipality.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-400 hover:underline" // Tailwind classes for link
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }} // Align icon and text
+                                    >
+                                        Vir: Wikipedia <ExternalLink size={16} /> {/* Added external link icon */}
+                                    </a>
+                                </Typography>
+                            </Box>
+                        )}
+                    </Stack>
+                                        {/* Image Section */}
+                                        <AnimatePresence>
                         {showImage && (
                             <motion.div
                                 variants={imageVariants}
                                 initial="hidden"
                                 animate="visible"
                                 exit="exit"
-                                className="mb-4 overflow-hidden"
+                                className="mb-4 overflow-hidden "
                                 style={{ textAlign: 'center' }} // Center image horizontally
                             >
                                 {imageError ? (
@@ -189,47 +240,6 @@ const MunicipalityCard: React.FC<{ municipality: Municipality }> = ({ municipali
                             </motion.div>
                         )}
                     </AnimatePresence>
-
-                    {/* Details Section */}
-                    <Stack spacing={1.5}> {/* Increased spacing */}
-                        {/* Helper function or direct map could be used if more fields */}
-                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}> {/* Lighter grey text */}
-                            <strong>Površina:</strong> {municipality.Povrsina} km²
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
-                            <strong>Prebivalci:</strong> {municipality.Prebivalci}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
-                            <strong>Gostota:</strong> {municipality.Gostota} /km²
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
-                            <strong>Naselja:</strong> {municipality.Naselja}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
-                            <strong>Leto ustanovitve:</strong> {municipality.Leto}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
-                            <strong>Pokrajina:</strong> {municipality.Pokrajina}
-                        </Typography>
-                         <Typography variant="body2" sx={{ color: '#cbd5e1' }}>
-                            <strong>Odcepitev:</strong> {municipality.OdcepitevOdkomuneobcine || '-'}
-                        </Typography>
-
-                        {municipality.Url && (
-                            <Box sx={{ mt: 1 }}> {/* Add some space above the link */}
-                                <Typography variant="body2">
-                                    <a
-                                        href={municipality.Url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-400 hover:underline" // Tailwind classes for link
-                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }} // Align icon and text
-                                    >
-                                        Vir: Wikipedia <ExternalLink size={16} /> {/* Added external link icon */}
-                                    </a>
-                                </Typography>
-                            </Box>
-                        )}
                     </Stack>
                 </CardContent>
             </Card>
@@ -368,9 +378,11 @@ const MunicipalitiesPage = () => {
             </Typography>
             <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8"> {/* Improved responsive grid and gap */}
                 <AnimatePresence> {/* Enable exit animations */}
+                  <Stack gap={4}>
                     {municipalities.map((municipality) => (
                         <MunicipalityCard key={municipality.Obcina} municipality={municipality} />
                     ))}
+                    </Stack>
                 </AnimatePresence>
             </Box>
         </Box>
