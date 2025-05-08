@@ -24,7 +24,7 @@ const MenuProps = {
     'Dolenjska', 'Primorska']
 
 interface RegionSelectProps {
-  onChange: (e) => void;
+  onChange: (e: any) => void;
 };
 
 const RegionSelect: React.FC<RegionSelectProps> = (props) => {
