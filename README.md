@@ -13,7 +13,8 @@ It is an exercise in vibe coding. It should only contain AI generated code, with
 
 Hosting is done on netlify and deployment is automated. Commits on main branch trigger deployment.
 
-App is hosted on [https://slovenskeobcine.netlify.app/](https://slovenskeobcine.netlify.app/)```
+App is hosted on [https://slovenskeobcine.netlify.app/](https://slovenskeobcine.netlify.app/)
+```
 
 ## About
 
